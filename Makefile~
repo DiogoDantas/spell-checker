@@ -1,0 +1,9 @@
+CC = g++
+
+all:
+	$(CC) main.cpp objLoader.cpp obj_parser.cpp list.cpp string_extra.cpp  -lglut -lGLU -lGL -I. -o Main
+
+
+clean:
+	rm Main
+
