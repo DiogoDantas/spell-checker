@@ -33,7 +33,7 @@ typedef struct wrong_word
 const int buckets = 25609; //number of buckets used in hash table
 int cont_correct = 0; //number of correct words
 int cont_wrong=0; //number of wrong words
-float total_time; //time calculated in proccess (used to print results)
+float time; //time calculated in proccess (used to print results)
 clock_t initial_time, final_time; //time = final - initial
 string words_list[307860]; //copy of dictionary words (used to generate hash table)
 Header table[buckets]; //array of Headers that will save a linked list and the size
@@ -195,66 +195,56 @@ bool compare(string word)
 
 }
 
-/****
- *Author: Diogo Dantas and Higor Anjos based on DVC (Diablo Valley College) parsing algorithm
-
- * parse_text(): This function sweeps an linked list comparing its nodes
- *
- * Parameters: string to be compared
- *
- * Return: a boolean indicating if is equal or not
- *
- ****/
-
 /************** PARSING TEXT *******************************/
 void parse_text(){
-    const int CHARS_PARAGRAPH = 525; //75 characters per line * 7 lines (paragraph)
-    const int WORDS_LINE = 100; //100 words in a line
-    const char* const DELIMITER = "  ,.:?;!'\""; //these are ignorated as words
-    int line_count = -1; //used to save the quantity of lines
+    const int MAX_CHARS_PER_LINE = 512;
+    const int MAX_TOKENS_PER_LINE = 100;
+    const char* const DELIMITER = "  ,.:?;!'\"";
+    int line_count = -1;
 
-
+    // create a file-reading object
   ifstream file;
-  file.open("teste.txt");
+  file.open("teste.txt"); // open a file
   if (!file.good())
-    cout<<"problem loading file"<<endl;
+    cout<<"problem loading file"<<endl; // exit if file not found
 
+  // read each line of the file
   while (!file.eof())
   {
     line_count++;
     // read an entire line into memory
-    char buf[CHARS_PARAGRAPH];
-    file.getline(buf, CHARS_PARAGRAPH);
+    char buf[MAX_CHARS_PER_LINE];
+    file.getline(buf, MAX_CHARS_PER_LINE);
 
-    // parse the line into DELIMITER
-    int n = 0;
+    // parse the line into blank-delimited tokens
+    int n = 0; // a for-loop index
 
-    // array to store pointers of the words in buf
-    const char* words[WORDS_LINE] = {}; // initialize to 0
+    // array to store memory addresses of the tokens in buf
+    const char* token[MAX_TOKENS_PER_LINE] = {}; // initialize to 0
 
     // parse the line
-    words[0] = strtok(buf, DELIMITER); // first words
-    if (words[0]) // zero if line is blank
+    token[0] = strtok(buf, DELIMITER); // first token
+    if (token[0]) // zero if line is blank
     {
-      for (n = 1; n < WORDS_LINE; n++)
+      for (n = 1; n < MAX_TOKENS_PER_LINE; n++)
       {
-        words[n] = strtok(0, DELIMITER); // subsequent words
-        if (!words[n]) break; // no more words
+        token[n] = strtok(0, DELIMITER); // subsequent tokens
+        if (!token[n]) break; // no more tokens
       }
     }
 
-    // process (print) the words
-    for (int i = 0; i < n; i++){ // n = number of words
+    // process (print) the tokens
+    for (int i = 0; i < n; i++){ // n = #of tokens
 
-           if(compare(words[i])){
-                cont_correct++; //if is equal just increase
+           if(compare(token[i])){
+                cont_correct++;
             }else{
                 cont_wrong++;
                 Wrong_word * tmp = new Wrong_word;
-                tmp->line = line_count; //in wich line the words is
-                tmp->column = i; //in wich column the words is
-                tmp->word = words[i];
-                vector_wrong.push_back(*tmp); //addind to vector
+                tmp->line = line_count;
+                tmp->column = i;
+                tmp->word = token[i];
+                vector_wrong.push_back(*tmp);
                 delete tmp;
             }
 
@@ -268,21 +258,11 @@ void parse_text(){
 }
 /************** PARSING TEXT *******************************/
 
-/****
- *Author: Diogo Dantas and Higor Anjos
-
- * print_results(): This function prints the statistics of the program
- *
- * Parameters: none
- *
- * Return: none
- *
- ****/
 /************** PRINTING RESULTS ******************************/
 void print_results(){
 cout<<endl;
 cout<<"Número total de palavras do texto: "<<cont_correct+cont_wrong<<endl;
-cout<<"time de verificação: "<<total_time<<"ms."<<endl;
+cout<<"time de verificação: "<<time<<"ms."<<endl;
 cout<<"Número de palavras que falharam no spell check: "<<cont_wrong<<endl;
 cout<<"Lista de palavras que falharam no spell check: "<<endl;
 cout<<endl;
@@ -305,9 +285,7 @@ int  main(int argc, char const *argv[])
     parse_text();
     final_time = clock();
 
-    // FINAL TIME - INITIAL TIME
-
-    total_time = ((float)(final_time - initial_time)/CLOCKS_PER_SEC)*1000;
+    time = ((float)(final_time - initial_time)/CLOCKS_PER_SEC)*1000;
 
     print_results();
     return 0;
