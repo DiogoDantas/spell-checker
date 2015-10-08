@@ -59,6 +59,32 @@ std::vector<Wrong_word> vector_wrong; //vector used to save the wrong words foun
  *
  ****/
 
+ int hash_lose(const char *string)
+    {
+    unsigned int hash = 0;
+    int c;
+
+    while (c = *string++)
+        hash += c;
+
+     hash = hash % buckets;
+    return hash;
+    }
+
+ int hash_sdbm(const char* string)
+ {
+
+        unsigned long int hash = 0;
+        int c;
+
+        while (c = *string++)
+            hash = c + (hash << 6) + (hash << 16) - hash;
+
+        hash = hash % buckets;
+        return hash;
+
+ }
+
 int hash_djb2(const char* string)
 {
     unsigned long int hash = 5381;
@@ -145,7 +171,7 @@ file.close();
 /******* APPLYING HASH AND GENERATING TABLE *****/
     for (int i = 0; i < j; ++i)
     {
-            int hashed = hash_djb2(words_list[i].c_str()); //using the dictionary words to hash
+            int hashed = hash_lose(words_list[i].c_str()); //using the dictionary words to hash
             table[hashed].size++; //increasing the size of the linked list of this bucket
             Node* tmp = new Node;
                     if (!table[hashed].first_Node) //if first
@@ -179,7 +205,7 @@ file.close();
 bool compare(string word)
 {
     word = to_lowerCase(word);
-    int hashed = hash_djb2(word.c_str());
+    int hashed = hash_lose(word.c_str());
 
 
     Node* aux = table[hashed].first_Node;
@@ -208,14 +234,14 @@ bool compare(string word)
 
 /************** PARSING TEXT *******************************/
 void parse_text(){
-    const int CHARS_PARAGRAPH = 525; //75 characters per line * 7 lines (paragraph)
-    const int WORDS_LINE = 100; //100 words in a line
+    const int CHARS_PARAGRAPH = 5250; //75 characters per line * 7 lines (paragraph)
+    const int WORDS_LINE = 1000; //100 words in a line
     const char* const DELIMITER = "  ,.:?;!'\""; //these are ignorated as words
     int line_count = -1; //used to save the quantity of lines
 
 
   ifstream file;
-  file.open("teste.txt");
+  file.open("teste2.txt");
   if (!file.good())
     cout<<"problem loading file"<<endl;
 
@@ -291,7 +317,7 @@ cout<<"------------------------------------------"<<endl;
 
 for (int i = 0; i < cont_wrong; ++i)
     {
-        cout<<vector_wrong[i].line+1<<" - "<<vector_wrong[i].column+1<<" : "<<vector_wrong[i].word<<endl;
+        //cout<<vector_wrong[i].line+1<<" - "<<vector_wrong[i].column+1<<" : "<<vector_wrong[i].word<<endl;
     }
 
 }
