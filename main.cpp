@@ -171,7 +171,7 @@ file.close();
 /******* APPLYING HASH AND GENERATING TABLE *****/
     for (int i = 0; i < j; ++i)
     {
-            int hashed = hash_lose(words_list[i].c_str()); //using the dictionary words to hash
+            int hashed = hash_sdbm(words_list[i].c_str()); //using the dictionary words to hash
             table[hashed].size++; //increasing the size of the linked list of this bucket
             Node* tmp = new Node;
                     if (!table[hashed].first_Node) //if first
@@ -205,7 +205,7 @@ file.close();
 bool compare(string word)
 {
     word = to_lowerCase(word);
-    int hashed = hash_lose(word.c_str());
+    int hashed = hash_sdbm(word.c_str());
 
 
     Node* aux = table[hashed].first_Node;
@@ -238,10 +238,10 @@ void parse_text(){
     const int WORDS_LINE = 1000; //100 words in a line
     const char* const DELIMITER = "  ,.:?;!'\""; //these are ignorated as words
     int line_count = -1; //used to save the quantity of lines
-
-
+  
   ifstream file;
-  file.open("teste2.txt");
+  file.open("teste.txt");
+  
   if (!file.good())
     cout<<"problem loading file"<<endl;
 
@@ -272,7 +272,7 @@ void parse_text(){
     // process (print) the words
     for (int i = 0; i < n; i++){ // n = number of words
 
-           if(compare(words[i])){
+           if(!compare(words[i])){
                 cont_correct++; //if is equal just increase
             }else{
                 cont_wrong++;
@@ -280,7 +280,7 @@ void parse_text(){
                 tmp->line = line_count; //in wich line the words is
                 tmp->column = i; //in wich column the words is
                 tmp->word = words[i];
-                vector_wrong.push_back(*tmp); //addind to vector
+                vector_wrong.push_back(*tmp); //adding to vector
                 delete tmp;
             }
 
@@ -317,7 +317,7 @@ cout<<"------------------------------------------"<<endl;
 
 for (int i = 0; i < cont_wrong; ++i)
     {
-        //cout<<vector_wrong[i].line+1<<" - "<<vector_wrong[i].column+1<<" : "<<vector_wrong[i].word<<endl;
+        cout<<vector_wrong[i].line+1<<" - "<<vector_wrong[i].column+1<<" : "<<vector_wrong[i].word<<endl;
     }
 
 }
