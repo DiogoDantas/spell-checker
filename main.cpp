@@ -41,24 +41,7 @@ std::vector<Wrong_word> vector_wrong; //vector used to save the wrong words foun
 
 
 
-
-/****
- *Author: Daniel J. Bernstein
-
- * hash_djb2(): This is one of the best
-* known hash functions for strings. Because it is both computed very
-* fast and distributes very well.
-*
-* The magic of number 33, i.e. why it works better than many other
-* constants, prime or not, has never been adequately explained by
-* anyone.
- *
- * Parameters: a string to be converted (hashed)
- *
- * Return: A int number that represents the string hashed
- *
- ****/
-
+/****************************** HASH FUNCTIONS *******************************/
  int hash_lose(const char *string)
     {
     unsigned int hash = 0;
@@ -84,7 +67,22 @@ std::vector<Wrong_word> vector_wrong; //vector used to save the wrong words foun
         return hash;
 
  }
+/****
+ *Author: Daniel J. Bernstein
 
+ * hash_djb2(): This is one of the best
+* known hash functions for strings. Because it is both computed very
+* fast and distributes very well.
+*
+* The magic of number 33, i.e. why it works better than many other
+* constants, prime or not, has never been adequately explained by
+* anyone.
+ *
+ * Parameters: a string to be converted (hashed)
+ *
+ * Return: A int number that represents the string hashed
+ *
+ ****/
 int hash_djb2(const char* string)
 {
     unsigned long int hash = 5381;
@@ -128,6 +126,7 @@ string to_lowerCase(string word)
  *Author: Diogo Dantas and Higor Anjos
 
  * preprocessing(): This function does all preprocessing needed to use the spell-checker
+ * creates the array of headers, the array of the dictionary words and generates the table
  *
  * Parameters: none
  *
@@ -191,10 +190,12 @@ file.close();
 
 } //END OF preprocessing()
 
+
+
 /****
  *Author: Diogo Dantas and Higor Anjos
 
- * compare(): This function sweeps an linked list comparing its nodes
+ * compare(): This function sweeps a linked list comparing its nodes to a string
  *
  * Parameters: string to be compared
  *
@@ -221,21 +222,23 @@ bool compare(string word)
 
 }
 
+
+
 /****
  *Author: Diogo Dantas and Higor Anjos based on DVC (Diablo Valley College) parsing algorithm
 
  * parse_text(): This function sweeps an linked list comparing its nodes
  *
- * Parameters: string to be compared
+ * Parameters: none
  *
- * Return: a boolean indicating if is equal or not
+ * Return: none
  *
  ****/
 
 /************** PARSING TEXT *******************************/
 void parse_text(){
-    const int CHARS_PARAGRAPH = 5250; //75 characters per line * 7 lines (paragraph)
-    const int WORDS_LINE = 1000; //100 words in a line
+    const int CHARS_PARAGRAPH = 5250; //5250 characters per line * 7 lines (paragraph)
+    const int WORDS_LINE = 1000; //1000 words in a line
     const char* const DELIMITER = "  ,.:?;!'\""; //these are ignorated as words
     int line_count = -1; //used to save the quantity of lines
   
@@ -294,10 +297,13 @@ void parse_text(){
 }
 /************** PARSING TEXT *******************************/
 
+
+
 /****
  *Author: Diogo Dantas and Higor Anjos
 
- * print_results(): This function prints the statistics of the program
+ * print_results(): This function prints the results of the program,
+ * such as number of wrong words and time
  *
  * Parameters: none
  *
@@ -323,6 +329,86 @@ for (int i = 0; i < cont_wrong; ++i)
 }
 /************** PRINTING RESULTS **************************************/
 
+/****
+ *Author: Diogo Dantas and Higor Anjos
+
+ * print_stats(): This function prints the statistics of the program. If the
+ * hash function distriuted well and so on...
+ *
+ * Parameters: none
+ *
+ * Return: none
+ *
+ ****/
+/************** PRINTING STATS ******************************/
+void print_stats(){
+char option;
+int indexb, indexw, greater=0, lower=0, equal=0;
+int average=307860/buckets;
+int worst=0;
+int best = table[0].size; //used for comparison
+cout<<endl;
+
+
+for (int i = 0; i < buckets; ++i)
+{
+	if(table[i].size > worst){
+		worst = table[i].size;
+		indexw = i;
+	}
+	
+	if(table[i].size < best){
+		best = table[i].size;
+		indexb = i;
+	}
+
+	if(table[i].size > average){
+		greater++;
+	} else if(table[i].size < average){
+		lower++;
+	} else {
+		equal++;
+	}
+
+}
+cout<<"SOME STATISTICS"<<endl;
+cout<<"-----------------------"<<endl;
+cout<<"Number of buckets: "<<buckets<<endl;
+cout<<"Average collision: "<<average<<" collisions"<<endl;
+cout<<"Buckets above average: "<<greater<<endl;
+cout<<"Buckets below average: "<<lower<<endl;
+cout<<"Buckets equal average: "<<equal<<endl<<endl;
+
+cout<<"'Best Bucket'"<<endl;
+cout<<"Number ["<<indexb<<"]"<<endl;
+cout<<best<<" collisions"<<endl<<endl;
+cout<<"'Worst Bucket'"<<endl;
+cout<<"Number ["<<indexw<<"]"<<endl;
+cout<<worst<<" collisions"<<endl<<endl;
+cout<<"-----------------------"<<endl;
+
+
+cout<<endl;
+cout<<"Want to print buckets list? [y/n]"<<endl;
+cin>>option;
+
+if (option=='y')
+{
+	for (int i = 0; i < buckets; ++i)
+	{
+		cout<<"Bucket "<<i<<" - "<<table[i].size<<" buckets"<<endl;
+	} 
+
+} else {
+	cout << "Thanks for using this program!"<<endl;
+}
+
+
+
+
+}
+/************** PRINTING STATS ******************************/
+
 int  main(int argc, char const *argv[])
 {
     preprocessing();
@@ -334,7 +420,8 @@ int  main(int argc, char const *argv[])
     // FINAL TIME - INITIAL TIME
 
     total_time = ((float)(final_time - initial_time)/CLOCKS_PER_SEC)*1000;
-
-    print_results();
+    
+    //print_results();
+    print_stats();
     return 0;
 }
