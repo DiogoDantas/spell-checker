@@ -30,7 +30,7 @@ typedef struct wrong_word
 
 /****************************** STRUCTS DECLARATION *******************************/
 
-const int buckets = 25609; //number of buckets used in hash table
+const int buckets = 200000; //number of buckets used in hash table
 int cont_correct = 0; //number of correct words
 int cont_wrong=0; //number of wrong words
 float total_time; //time calculated in proccess (used to print results)
@@ -53,6 +53,21 @@ std::vector<Wrong_word> vector_wrong; //vector used to save the wrong words foun
      hash = hash % buckets;
     return hash;
     }
+
+/****
+ *Author: Ozan Yigit
+*
+* hash_sdbm(): This was created for sdbm database library.
+* The hashing scheme used is a form of extendible hashing,
+*	so that the hashing scheme expands as new buckets are added to the database.
+* It was found to do well in scrambling bits, causing better distribution of
+* the keys and fewer splits
+*
+* Parameters: a string to be converted (hashed)
+*
+* Return: A int number that represents the string hashed
+*
+****/
 
  int hash_sdbm(const char* string)
  {
@@ -239,12 +254,12 @@ bool compare(string word)
 void parse_text(){
     const int CHARS_PARAGRAPH = 5250; //5250 characters per line * 7 lines (paragraph)
     const int WORDS_LINE = 1000; //1000 words in a line
-    const char* const DELIMITER = "  ,.:?;!'\""; //these are ignorated as words
+    const char* const DELIMITER = " ,.:?;!\""; //these are ignorated as words
     int line_count = -1; //used to save the quantity of lines
-  
+
   ifstream file;
-  file.open("teste.txt");
-  
+  file.open("text.txt");
+
   if (!file.good())
     cout<<"problem loading file"<<endl;
 
@@ -275,7 +290,7 @@ void parse_text(){
     // process (print) the words
     for (int i = 0; i < n; i++){ // n = number of words
 
-           if(!compare(words[i])){
+           if(compare(words[i])){
                 cont_correct++; //if is equal just increase
             }else{
                 cont_wrong++;
@@ -346,20 +361,27 @@ char option;
 int indexb, indexw, greater=0, lower=0, equal=0;
 int average=307860/buckets;
 int worst=0;
-int best = table[0].size; //used for comparison
+int best = buckets; //used for comparison
+int numZero = 0;
 cout<<endl;
 
 
 for (int i = 0; i < buckets; ++i)
 {
+
+	if(table[i].size == 0)
+		numZero++;
 	if(table[i].size > worst){
 		worst = table[i].size;
 		indexw = i;
 	}
-	
+
 	if(table[i].size < best){
-		best = table[i].size;
-		indexb = i;
+		if(table[i].size > 0 )
+		{
+				best = table[i].size;
+				indexb = i;
+		}
 	}
 
 	if(table[i].size > average){
@@ -377,7 +399,8 @@ cout<<"Number of buckets: "<<buckets<<endl;
 cout<<"Average collision: "<<average<<" collisions"<<endl;
 cout<<"Buckets above average: "<<greater<<endl;
 cout<<"Buckets below average: "<<lower<<endl;
-cout<<"Buckets equal average: "<<equal<<endl<<endl;
+cout<<"Buckets equal average: "<<equal<<endl;
+cout<<"Empty Buckets: "<<numZero<<endl<<endl;
 
 cout<<"'Best Bucket'"<<endl;
 cout<<"Number ["<<indexb<<"]"<<endl;
@@ -396,8 +419,8 @@ if (option=='y')
 {
 	for (int i = 0; i < buckets; ++i)
 	{
-		cout<<"Bucket "<<i<<" - "<<table[i].size<<" buckets"<<endl;
-	} 
+		cout<<"Bucket "<<i<<" - "<<table[i].size<<" collisions"<<endl;
+	}
 
 } else {
 	cout << "Thanks for using this program!"<<endl;
@@ -420,8 +443,8 @@ int  main(int argc, char const *argv[])
     // FINAL TIME - INITIAL TIME
 
     total_time = ((float)(final_time - initial_time)/CLOCKS_PER_SEC)*1000;
-    
-    //print_results();
-    print_stats();
+
+    print_results();
+    //print_stats();
     return 0;
 }
